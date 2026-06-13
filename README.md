@@ -2,41 +2,11 @@
 
 **MCP Server Security Scanner** — fuzzing + static analysis. Cat's eye sees what others miss.
 
-|![PyPI](https://img.shields.io/pypi/v/mcp-cateye)](https://pypi.org/project/mcp-cateye/)
+[English](README.md) | [中文](README.zh.md)
+
+[![PyPI](https://img.shields.io/pypi/v/mcp-cateye)](https://pypi.org/project/mcp-cateye/)
 [![Python](https://img.shields.io/pypi/pyversions/mcp-cateye)](https://pypi.org/project/mcp-cateye/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-## 简介 (Chinese)
-
-> 🐱 **mcp-cateye** 是一款 MCP（Model Context Protocol）服务器安全扫描器，结合**动态模糊测试**和**静态分析**两大引擎。
->
-> 市面上大多数 MCP 安全工具只做静态分析或只做配置扫描。mcp-cateye 是唯一同时支持**主动 fuzzing** + **静态审计** + **AI-BOM 生成**的工具。
-
-**核心能力：**
-
-- 🔴 **动态 Fuzzing** — 50+ 攻击载荷，9 大类（命令注入/路径穿越/SSRF/提示词注入/SQL/XSS/模板注入/信息泄露/反序列化）
-- 🔍 **配置发现** — 扫描 Claude Desktop / Cursor / VS Code / Windsurf / Zed / Cline 等客户端的 MCP 配置
-- 🔑 **密钥检测** — OpenAI、GitHub、AWS、Slack、JWT、私钥、数据库连接串
-- 🛡️ **工具描述分析** — 检测投毒（poisoning）、rug pull、提示词注入、过度授权
-- 📦 **依赖漏洞** — pip-audit 集成，扫描已知 CVE
-- 🏗️ **代码就绪度** — AST 分析，检测缺失 timeout、`shell=True`、裸 except
-- 🎯 **安全评分** — 0-100 分 + A-F 等级，分类别展示扣分
-- 📋 **AI-BOM** — CycloneDX 1.5 JSON 格式的物料清单
-
-### 竞品对比
-
-```mermaid
-graph LR
-    A[apisec/mcp-audit] -->|配置/AI-BOM| E[mcp-cateye]
-    B[cisco/mcp-scanner] -->|pip-audit/readiness| E
-    C[invariantlabs/mcp-scan] -->|投毒检测| E
-    D[LuciferForge] -->|0-100 评分| E
-    E -->|动态 fuzzing 🐱| F[唯一全栈]
-```
-
-**mcp-cateye 是唯一同时拥有 动态 fuzzing + 静态分析 + 评分 + AI-BOM 的工具。**
-
----
 
 ## Features
 
@@ -167,8 +137,6 @@ graph LR
 
 Most MCP security tools do **either** static analysis **or** config scanning. **mcp-cateye is the only tool that combines active fuzzing with static analysis, dependency scanning, scoring, and AI-BOM generation in one CLI.**
 
-Cat's eye sees what others miss. 🐱
-
 ## CI/CD Integration
 
 ```yaml
@@ -191,8 +159,6 @@ Most MCP security tools only do static analysis. mcp-cateye is the only tool tha
 1. **Active fuzzing** — actually sends malicious payloads to MCP servers
 2. **Static analysis** — scans configs, code, and dependencies
 3. **Security scoring** — gives you a single number to track
-
-Cat's eye sees what others miss. 🐱
 
 ## License
 
