@@ -132,6 +132,21 @@ The `score` command gives a quick 0-100 rating:
 | Info Disclosure | 4 | Stack traces, debug endpoints |
 | Deserialization | 4 | Pickle, YAML unsafe |
 
+## How mcp-cateye Compares
+
+| Tool | Strong point | In mcp-cateye? |
+|------|--------------|----------------|
+| [apisec/mcp-audit](https://github.com/apisec-inc/mcp-audit) | Config discovery, secrets detection, AI-BOM | ✅ All included |
+| [cisco/mcp-scanner](https://github.com/cisco-ai-defense/mcp-scanner) | pip-audit integration, readiness checks | ✅ Both included |
+| [invariantlabs/mcp-scan](https://github.com/invariantlabs-ai/mcp-scan) | Tool description poisoning detection | ✅ `analyze_tool_descriptions` |
+| [LuciferForge/mcp-security-audit](https://github.com/LuciferForge/mcp-security-audit) | 0-100 scoring with letter grades | ✅ `calculate_score` + A-F grades |
+| [mcpserver-audit](https://github.com/ModelContextProtocol-Security/mcpserver-audit) | CSA project, audit-db publishing | 🔜 Roadmap (v1.2) |
+| **mcp-cateye** | **Active fuzzing** | 🐱 **Only tool that fuzzes** |
+
+Most MCP security tools do **either** static analysis **or** config scanning. **mcp-cateye is the only tool that combines active fuzzing with static analysis, dependency scanning, scoring, and AI-BOM generation in one CLI.**
+
+Cat's eye sees what others miss. 🐱
+
 ## CI/CD Integration
 
 ```yaml
