@@ -1,38 +1,27 @@
 # 🐱 mcp-cateye
 
-> Cat's eye sees what others miss.
+**MCP Server Security Scanner** — fuzzing + static analysis. Cat's eye sees what others miss.
 
-**MCP Server security scanner with fuzzing** — the first tool that actually
-*attacks* MCP servers to find vulnerabilities, not just reads their config files.
-
-[![PyPI version](https://img.shields.io/pypi/v/mcp-cateye.svg)](https://pypi.org/project/mcp-cateye/)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/mcp-cateye)](https://pypi.org/project/mcp-cateye/)
+[![Python](https://img.shields.io/pypi/pyversions/mcp-cateye)](https://pypi.org/project/mcp-cateye/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Why mcp-cateye?
+## Features
 
-Every other MCP security tool does **static analysis** — they read your config,
-list your tools, check permission declarations. That's like checking if a door
-*looks* locked without trying the handle.
+### Dynamic Analysis (Fuzzing)
+- **Active fuzzing** of MCP server tools with 50+ payloads across 9 categories
+- Command injection, path traversal, SSRF, prompt injection, SQL injection, XSS, SSTI, info disclosure, deserialization
+- Category filtering for targeted testing
+- JSON output for CI/CD integration
 
-**mcp-cateye actually tries the handle.** It connects to your MCP server,
-enumerates every tool, and fires real attack payloads at every parameter:
-
-| Category | Payloads | What it tests |
-|----------|----------|---------------|
-| 🔴 Command Injection | 9 | `$(id)`, `` `whoami` ``, `; cat /etc/passwd` |
-| 🟠 Path Traversal | 5 | `../../../etc/passwd`, URL-encoded bypasses |
-| 🔴 Prompt Injection | 5 | System prompt extraction, DAN jailbreak |
-| 🔴 SSRF | 7 | AWS/GCP/Alibaba metadata, Redis, file:// |
-| 🟠 Template Injection | 5 | `{{7*7}}`, `${7*7}`, Jinja2 globals |
-| 🟠 SQL Injection | 4 | UNION, tautology, time-based blind |
-| 🟡 XSS | 3 | `<script>`, `<img onerror>`, attribute breakout |
-| 🔴 Info Disclosure | 3 | `.env`, `.git/config`, `config.yaml` |
-| 🔴 Deserialization | 2 | Python pickle, PHP unserialize |
-
-Then it **checks the response** — if the server returns `uid=0`, command
-execution confirmed. If it returns `/etc/passwd` content, file read confirmed.
-If it echoes the system prompt, prompt leak confirmed.
+### Static Analysis (NEW in v1.1.0)
+- **Config Discovery** — scan Claude, Cursor, VS Code, Windsurf, Zed, Cline, RooCode configs
+- **Secrets Detection** — find hardcoded API keys, tokens, passwords (OpenAI, GitHub, AWS, Slack, JWT, etc.)
+- **Tool Description Analysis** — detect poisoning, rug pull, prompt injection, over-privileged tools
+- **Dependency Scanning** — pip-audit integration for known CVEs
+- **Readiness Checks** — AST-based analysis for missing timeouts, shell=True, bare excepts
+- **Security Score** — 0-100 score with A-F grade breakdown
+- **AI-BOM** — CycloneDX 1.5 JSON bill of materials for MCP servers
 
 ## Installation
 
@@ -40,93 +29,100 @@ If it echoes the system prompt, prompt leak confirmed.
 pip install mcp-cateye
 ```
 
-Or with uv:
-```bash
-uv tool install mcp-cateye
-```
-
 ## Quick Start
 
+### Fuzz an MCP server
 ```bash
-# List tools on a server
-mcp-cateye list-tools python -m my_mcp_server
-
-# Fuzz everything
-mcp-cateye fuzz python -m my_mcp_server
+# Fuzz all tools
+mcp-cateye fuzz python -- -m my_mcp_server
 
 # Fuzz specific categories
-mcp-cateye fuzz uvx mcp-server-git -c cmd -c ssrf
+mcp-cateye fuzz -c cmd -c ssrf node -- server.js
 
-# JSON output for CI/CD
-mcp-cateye fuzz node server.js --json
-
-# With environment variables
-mcp-cateye fuzz python server.py -e API_KEY=sk-xxx -e DEBUG=true
+# JSON output for CI
+mcp-cateye fuzz --json python -- server.py
 ```
 
-## Example Output
+### Static analysis
+```bash
+# Full scan
+mcp-cateye scan .
 
-```
-╔══════════════════════════════════════════════════════════╗
-║              🐱 mcp-cateye Scan Report                  ║
-╚══════════════════════════════════════════════════════════╝
+# Quick security score
+mcp-cateye score .
 
-  Server:  python -m my_mcp_server
-  Tools:   3
-  Tests:   540
-  Time:    12.3s
+# Generate AI-BOM
+mcp-cateye scan . --aibom
 
-  ── Findings ────────────────────────────────────────────
-  🔴 Critical: 2
-  🟠 High:     1
-  🟡 Medium:   0
-  🔵 Low:      1
-  📊 Total:    4
-
-  1. 🔴 [CRITICAL] run_command.command — Subshell command execution via $()
-     Payload: $(id)
-     Response: uid=501(cat) gid=20(staff) groups=20(staff)...
-
-  2. 🔴 [CRITICAL] read_file.path — Unix path traversal to /etc/passwd
-     Payload: ../../../etc/passwd
-     Response: root:*:0:0:System Administrator:/var/root:/bin/sh...
-
-  🐱 Scan complete. Cat's eye sees all.
+# Scan specific clients
+mcp-cateye scan . --clients claude --clients cursor
 ```
 
-## How It Works
+### List tools and payloads
+```bash
+# List tools on a server
+mcp-cateye list-tools python -- -m my_mcp_server
 
-1. **Connect** — launches the MCP server via stdio and initializes a session
-2. **Enumerate** — calls `list_tools()` to discover every tool and its parameters
-3. **Fuzz** — for each tool × parameter × payload, sends the payload and
-   inspects the response
-4. **Detect** — checks responses against detection patterns (e.g., `uid=` in
-   output = command injection confirmed)
-5. **Report** — outputs findings with severity, confidence, and response snippets
+# List available payloads
+mcp-cateye list-payloads
+```
 
-## Use Cases
+## Security Score
 
-- **MCP Server Developers**: Test your server before publishing
-- **Security Researchers**: Find 0-days in popular MCP servers
-- **CI/CD Pipelines**: `mcp-cateye fuzz ... --json` in your test suite
-- **MCP Registry Maintainers**: Audit servers before listing
+The `score` command gives a quick 0-100 rating:
 
-## vs. Other Tools
+```
+🐱 mcp-cateye — Security Score
 
-| Feature | mcp-cateye | mcp-scan | cisco-mcp-scanner | snyk-agent-scan | antgroup/MCPScan |
-|---------|------------|----------|-------------------|-----------------|------------------|
-| Static analysis | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Active fuzzing | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Command injection | ✅ | ❌ | ❌ | ❌ | ❌ |
-| SSRF detection | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Prompt injection | ✅ | ✅ | ❌ | ✅ | ❌ |
-| Template injection | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Response-based detection | ✅ | ❌ | ❌ | ❌ | ❌ |
+  🟡 B+  [██████████████████████░░░░░░░░]  72/100
+
+  Breakdown:
+    fuzzing              [████████████████████] 100/100
+    secrets              [██████████░░░░░░░░░░]  50/100
+    dependencies         [████████████████████] 100/100
+    tool_descriptions    [██████████████░░░░░░]  70/100
+    readiness            [████████████████░░░░]  80/100
+```
+
+## Payload Categories
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| Command Injection | 8 | `$(whoami)`, backticks, `os.system` |
+| Path Traversal | 6 | `../../etc/passwd`, null bytes |
+| SSRF | 6 | `http://169.254.169.254`, DNS rebinding |
+| Prompt Injection | 7 | Ignore instructions, role hijack |
+| SQL Injection | 6 | Union, blind, time-based |
+| XSS | 5 | Script tags, event handlers |
+| Template Injection | 5 | Jinja2, Twig, Freemarker |
+| Info Disclosure | 4 | Stack traces, debug endpoints |
+| Deserialization | 4 | Pickle, YAML unsafe |
+
+## CI/CD Integration
+
+```yaml
+# GitHub Actions
+- name: Security Scan
+  run: |
+    pip install mcp-cateye
+    mcp-cateye scan . --json > report.json
+    mcp-cateye score .
+```
+
+Exit codes:
+- `0` — No critical findings
+- `1` — Critical findings detected
+
+## Why mcp-cateye?
+
+Most MCP security tools only do static analysis. mcp-cateye is the only tool that combines:
+
+1. **Active fuzzing** — actually sends malicious payloads to MCP servers
+2. **Static analysis** — scans configs, code, and dependencies
+3. **Security scoring** — gives you a single number to track
+
+Cat's eye sees what others miss. 🐱
 
 ## License
 
-MIT © 2026 cat
-
----
-
-🐱 *The cat's eye sees in the dark. Your MCP server's vulnerabilities can't hide.*
+MIT

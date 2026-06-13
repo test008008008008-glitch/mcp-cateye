@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-cateye"
-version = "1.0.1"
-description = "MCP Server security scanner with fuzzing — cat's eye sees what others miss"
+version = "1.1.0"
+description = "MCP Server security scanner — fuzzing + static analysis. Cat's eye sees what others miss."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
     {name = "cat", email = "cat@cateye.dev"}
 ]
-keywords = ["mcp", "security", "scanner", "fuzzer", "model-context-protocol", "audit"]
+keywords = ["mcp", "security", "scanner", "fuzzer", "static-analysis", "model-context-protocol", "audit", "aibom"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
