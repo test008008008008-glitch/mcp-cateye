@@ -2,9 +2,28 @@
 
 **MCP Server Security Scanner** — fuzzing + static analysis. Cat's eye sees what others miss.
 
-[![PyPI](https://img.shields.io/pypi/v/mcp-cateye)](https://pypi.org/project/mcp-cateye/)
+|![PyPI](https://img.shields.io/pypi/v/mcp-cateye)](https://pypi.org/project/mcp-cateye/)
 [![Python](https://img.shields.io/pypi/pyversions/mcp-cateye)](https://pypi.org/project/mcp-cateye/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 简介 (Chinese)
+
+> 🐱 **mcp-cateye** 是一款 MCP（Model Context Protocol）服务器安全扫描器，结合**动态模糊测试**和**静态分析**两大引擎。
+>
+> 市面上大多数 MCP 安全工具只做静态分析或只做配置扫描。mcp-cateye 是唯一同时支持**主动 fuzzing** + **静态审计** + **AI-BOM 生成**的工具。
+
+**核心能力：**
+
+- 🔴 **动态 Fuzzing** — 50+ 攻击载荷，9 大类（命令注入/路径穿越/SSRF/提示词注入/SQL/XSS/模板注入/信息泄露/反序列化）
+- 🔍 **配置发现** — 扫描 Claude Desktop / Cursor / VS Code / Windsurf / Zed / Cline 等客户端的 MCP 配置
+- 🔑 **密钥检测** — OpenAI、GitHub、AWS、Slack、JWT、私钥、数据库连接串
+- 🛡️ **工具描述分析** — 检测投毒（poisoning）、rug pull、提示词注入、过度授权
+- 📦 **依赖漏洞** — pip-audit 集成，扫描已知 CVE
+- 🏗️ **代码就绪度** — AST 分析，检测缺失 timeout、`shell=True`、裸 except
+- 🎯 **安全评分** — 0-100 分 + A-F 等级，分类别展示扣分
+- 📋 **AI-BOM** — CycloneDX 1.5 JSON 格式的物料清单
+
+---
 
 ## Features
 
@@ -25,9 +44,24 @@
 
 ## Installation
 
+### From GitHub (recommended for now)
+```bash
+pip install git+https://github.com/test008008008008-glitch/mcp-cateye.git
+```
+
+### From PyPI (coming soon)
 ```bash
 pip install mcp-cateye
 ```
+
+### From source
+```bash
+git clone https://github.com/test008008008008-glitch/mcp-cateye
+cd mcp-cateye
+pip install -e .
+```
+
+**Requires Python 3.10+**
 
 ## Quick Start
 
