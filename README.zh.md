@@ -25,27 +25,20 @@
 - 🎯 **安全评分** — 0-100 分 + A-F 等级，分类别展示扣分
 - 📋 **AI-BOM** — CycloneDX 1.5 JSON 格式的物料清单
 
-## 竞品对比
+## 为什么选 mcp-cateye？
 
 ```mermaid
 graph LR
-    A[apisec/mcp-audit] -->|配置/AI-BOM| E[mcp-cateye]
-    B[cisco/mcp-scanner] -->|pip-audit/readiness| E
-    C[invariantlabs/mcp-scan] -->|投毒检测| E
-    D[LuciferForge] -->|0-100 评分| E
-    E -->|动态 fuzzing 🐱| F[唯一全栈]
+    A[动态 Fuzzing 🐱] --> E[mcp-cateye]
+    B[静态分析] --> E
+    C[安全评分] --> E
+    D[AI-BOM 生成] --> E
+    E --> F[一个 CLI。零盲点。]
 ```
 
-| 工具 | 长处 | cateye 是否包含 |
-|------|------|----------------|
-| [apisec/mcp-audit](https://github.com/apisec-inc/mcp-audit) | 配置发现、密钥检测、AI-BOM | ✅ 全部包含 |
-| [cisco/mcp-scanner](https://github.com/cisco-ai-defense/mcp-scanner) | pip-audit 集成、就绪度检查 | ✅ 两项都包含 |
-| [invariantlabs/mcp-scan](https://github.com/invariantlabs-ai/mcp-scan) | 工具描述投毒检测 | ✅ `analyze_tool_descriptions` |
-| [LuciferForge/mcp-security-audit](https://github.com/LuciferForge/mcp-security-audit) | 0-100 评分带字母等级 | ✅ `calculate_score` + A-F 等级 |
-| [mcpserver-audit](https://github.com/ModelContextProtocol-Security/mcpserver-audit) | CSA 项目、audit-db 发布 | 🔜 路线图（v1.2） |
-| **mcp-cateye** | **主动 fuzzing** | 🐱 **唯一支持 fuzzing 的工具** |
+市面上的 MCP 安全工具往往只覆盖其中一两项。mcp-cateye 是唯一在**同一个 CLI** 里把这四件事全做了的工具 —— 一次扫描，既能抓到静态扫描器漏掉的（命令注入、路径穿越、SSRF），也能抓到 fuzzer 漏掉的（硬编码密钥、依赖漏洞、投毒工具描述）。
 
-**mcp-cateye 是唯一同时拥有 动态 fuzzing + 静态分析 + 评分 + AI-BOM 的工具。**
+**猫的眼睛能看到别人忽略的东西。🐱**
 
 ## 安装
 
@@ -151,14 +144,6 @@ mcp-cateye list-payloads
 退出码：
 - `0` — 无 critical 漏洞
 - `1` — 检测到 critical 漏洞
-
-## 为什么选 mcp-cateye？
-
-大多数 MCP 安全工具只做静态分析。mcp-cateye 是唯一同时提供以下能力的工具：
-
-1. **主动 fuzzing** — 真的把恶意载荷发到 MCP 服务器
-2. **静态分析** — 扫描配置、代码和依赖
-3. **安全评分** — 一个数字就能追踪
 
 ## 许可证
 

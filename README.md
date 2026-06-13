@@ -25,6 +25,21 @@
 - **Security Score** — 0-100 score with A-F grade breakdown
 - **AI-BOM** — CycloneDX 1.5 JSON bill of materials for MCP servers
 
+## Why mcp-cateye?
+
+```mermaid
+graph LR
+    A[Active Fuzzing 🐱] --> E[mcp-cateye]
+    B[Static Analysis] --> E
+    C[Security Scoring] --> E
+    D[AI-BOM Generation] --> E
+    E --> F[One CLI. Zero blind spots.]
+```
+
+Existing MCP security tools each cover one or two of these. mcp-cateye is the only one that ships **all four** in a single CLI — so you can find the bugs that static-only scanners miss (command injection, path traversal, SSRF) and the bugs that fuzzers miss (hardcoded secrets, vulnerable dependencies, poisoned tool descriptions) in one scan.
+
+**Cat's eye sees what others miss. 🐱**
+
 ## Installation
 
 ### From GitHub (recommended for now)
@@ -115,28 +130,6 @@ The `score` command gives a quick 0-100 rating:
 | Info Disclosure | 4 | Stack traces, debug endpoints |
 | Deserialization | 4 | Pickle, YAML unsafe |
 
-## How mcp-cateye Compares
-
-```mermaid
-graph LR
-    A[apisec/mcp-audit] -->|config/AI-BOM| E[mcp-cateye]
-    B[cisco/mcp-scanner] -->|pip-audit/readiness| E
-    C[invariantlabs/mcp-scan] -->|poisoning detection| E
-    D[LuciferForge] -->|0-100 scoring| E
-    E -->|active fuzzing 🐱| F[only full-stack]
-```
-
-| Tool | Strong point | In mcp-cateye? |
-|------|--------------|----------------|
-| [apisec/mcp-audit](https://github.com/apisec-inc/mcp-audit) | Config discovery, secrets detection, AI-BOM | ✅ All included |
-| [cisco/mcp-scanner](https://github.com/cisco-ai-defense/mcp-scanner) | pip-audit integration, readiness checks | ✅ Both included |
-| [invariantlabs/mcp-scan](https://github.com/invariantlabs-ai/mcp-scan) | Tool description poisoning detection | ✅ `analyze_tool_descriptions` |
-| [LuciferForge/mcp-security-audit](https://github.com/LuciferForge/mcp-security-audit) | 0-100 scoring with letter grades | ✅ `calculate_score` + A-F grades |
-| [mcpserver-audit](https://github.com/ModelContextProtocol-Security/mcpserver-audit) | CSA project, audit-db publishing | 🔜 Roadmap (v1.2) |
-| **mcp-cateye** | **Active fuzzing** | 🐱 **Only tool that fuzzes** |
-
-Most MCP security tools do **either** static analysis **or** config scanning. **mcp-cateye is the only tool that combines active fuzzing with static analysis, dependency scanning, scoring, and AI-BOM generation in one CLI.**
-
 ## CI/CD Integration
 
 ```yaml
@@ -151,14 +144,6 @@ Most MCP security tools do **either** static analysis **or** config scanning. **
 Exit codes:
 - `0` — No critical findings
 - `1` — Critical findings detected
-
-## Why mcp-cateye?
-
-Most MCP security tools only do static analysis. mcp-cateye is the only tool that combines:
-
-1. **Active fuzzing** — actually sends malicious payloads to MCP servers
-2. **Static analysis** — scans configs, code, and dependencies
-3. **Security scoring** — gives you a single number to track
 
 ## License
 
