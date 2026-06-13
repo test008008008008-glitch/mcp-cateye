@@ -23,6 +23,19 @@
 - 🎯 **安全评分** — 0-100 分 + A-F 等级，分类别展示扣分
 - 📋 **AI-BOM** — CycloneDX 1.5 JSON 格式的物料清单
 
+### 竞品对比
+
+```mermaid
+graph LR
+    A[apisec/mcp-audit] -->|配置/AI-BOM| E[mcp-cateye]
+    B[cisco/mcp-scanner] -->|pip-audit/readiness| E
+    C[invariantlabs/mcp-scan] -->|投毒检测| E
+    D[LuciferForge] -->|0-100 评分| E
+    E -->|动态 fuzzing 🐱| F[唯一全栈]
+```
+
+**mcp-cateye 是唯一同时拥有 动态 fuzzing + 静态分析 + 评分 + AI-BOM 的工具。**
+
 ---
 
 ## Features
@@ -133,6 +146,15 @@ The `score` command gives a quick 0-100 rating:
 | Deserialization | 4 | Pickle, YAML unsafe |
 
 ## How mcp-cateye Compares
+
+```mermaid
+graph LR
+    A[apisec/mcp-audit] -->|config/AI-BOM| E[mcp-cateye]
+    B[cisco/mcp-scanner] -->|pip-audit/readiness| E
+    C[invariantlabs/mcp-scan] -->|poisoning detection| E
+    D[LuciferForge] -->|0-100 scoring| E
+    E -->|active fuzzing 🐱| F[only full-stack]
+```
 
 | Tool | Strong point | In mcp-cateye? |
 |------|--------------|----------------|
