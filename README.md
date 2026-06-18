@@ -73,6 +73,9 @@ mcp-cateye fuzz -c cmd -c ssrf node -- server.js
 
 # JSON output for CI
 mcp-cateye fuzz --json python -- server.py
+
+# HTML report
+mcp-cateye fuzz -o html -s report.html python -- server.py
 ```
 
 ### Static analysis

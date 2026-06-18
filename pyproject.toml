@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-cateye"
-version = "1.1.0"
+version = "1.2.0"
 description = "MCP Server security scanner — fuzzing + static analysis. Cat's eye sees what others miss."
 readme = "README.md"
 license = {text = "MIT"}

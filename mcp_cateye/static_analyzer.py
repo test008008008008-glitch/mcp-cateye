@@ -171,6 +171,31 @@ class SecretFinding:
     snippet: str  # masked
 
 
+# Directories that should always be excluded from scanning
+EXCLUDED_DIRS = {
+    "node_modules", ".git", "__pycache__", ".venv", "venv",
+    ".tox", ".eggs", "dist", "build", ".mypy_cache", ".pytest_cache",
+    "site-packages", ".hg", ".svn", "payloads",
+}
+
+# File names that are regex pattern definitions, not real secrets
+_SECRET_PATTERN_FILES = {"payloads", "static_analyzer", "test_", "conftest"}
+
+
+def _should_exclude_file(f: Path) -> bool:
+    """Check if a file should be excluded from scanning."""
+    parts = set(f.parts)
+    if parts & EXCLUDED_DIRS:
+        return True
+    # Skip files that define regex patterns (like our own scanner code).
+    # Only check the file NAME — checking path parts caused false exclusions
+    # (e.g. pytest tmp_path dirs contain "test_" prefix).
+    for marker in _SECRET_PATTERN_FILES:
+        if marker in f.name:
+            return True
+    return False
+
+
 def scan_secrets(paths: list[str]) -> list[SecretFinding]:
     """Scan files/directories for hardcoded secrets."""
     findings: list[SecretFinding] = []
@@ -180,10 +205,15 @@ def scan_secrets(paths: list[str]) -> list[SecretFinding]:
     for p in paths:
         pp = Path(p).expanduser().resolve()
         if pp.is_file():
-            files_to_scan.append(pp)
+            if not _should_exclude_file(pp):
+                files_to_scan.append(pp)
         elif pp.is_dir():
             for f in pp.rglob("*"):
-                if f.is_file() and (
+                if not f.is_file():
+                    continue
+                if _should_exclude_file(f):
+                    continue
+                if not (
                     f.suffix in (
                         ".py", ".js", ".ts", ".json", ".yaml", ".yml",
                         ".toml", ".sh", ".bash", ".cfg", ".ini",
@@ -191,12 +221,8 @@ def scan_secrets(paths: list[str]) -> list[SecretFinding]:
                     )
                     or f.name in (".env", ".env.local", ".env.production", ".env.dev")
                 ):
-                    # Skip common false-positive dirs
-                    parts = set(f.parts)
-                    if parts & {"node_modules", ".git", "__pycache__", ".venv",
-                                 "venv", ".tox", ".eggs", "dist", "build"}:
-                        continue
-                    files_to_scan.append(f)
+                    continue
+                files_to_scan.append(f)
 
     for fpath in files_to_scan:
         try:
@@ -452,8 +478,10 @@ def scan_readiness(source_paths: list[str]) -> list[ReadinessFinding]:
             continue
 
         for py_file in py_files:
-            # Skip test files and __pycache__
-            if "test" in py_file.name.lower() or "__pycache__" in str(py_file):
+            # Skip excluded dirs, test files, and __pycache__
+            if _should_exclude_file(py_file):
+                continue
+            if "test" in py_file.name.lower():
                 continue
 
             try:

@@ -10,7 +10,7 @@ import click
 
 from . import __version__
 from .payloads import Category
-from .scanner import fuzz_server, format_findings, format_findings_json
+from .scanner import fuzz_server, format_findings, format_findings_json, format_findings_html
 from .static_analyzer import (
     run_static_analysis,
     StaticAnalysisResult,
@@ -76,6 +76,19 @@ def main():
     multiple=True,
     help="Environment variables in KEY=VALUE format",
 )
+@click.option(
+    "--output", "-o",
+    type=click.Choice(["text", "json", "html"]),
+    default="text",
+    show_default=True,
+    help="Output format (--json is shorthand for -o json)",
+)
+@click.option(
+    "--save", "-s",
+    type=click.Path(),
+    default="",
+    help="Save report to a file (e.g., report.html)",
+)
 def fuzz(
     command: str,
     args: tuple[str, ...],
@@ -84,6 +97,8 @@ def fuzz(
     concurrency: int,
     output_json: bool,
     env: tuple[str, ...],
+    output: str,
+    save: str,
 ):
     """Fuzz an MCP server for security vulnerabilities.
 
@@ -96,6 +111,7 @@ def fuzz(
       mcp-cateye fuzz python -- -m my_mcp_server
       mcp-cateye fuzz uvx -- mcp-server-git
       mcp-cateye fuzz -c cmd -c ssrf node -- server.js
+      mcp-cateye fuzz -o html -s report.html python -- server.py
       mcp-cateye fuzz -e API_KEY=test --json python -- server.py
     """
     categories: list[Category] | None = None
@@ -128,10 +144,23 @@ def fuzz(
         )
     )
 
+    # --json flag is shorthand for --output json
     if output_json:
-        click.echo(format_findings_json(result))
+        output = "json"
+
+    if output == "json":
+        report = format_findings_json(result)
+    elif output == "html":
+        report = format_findings_html(result)
     else:
-        click.echo(format_findings(result))
+        report = format_findings(result)
+
+    if save:
+        from pathlib import Path
+        Path(save).write_text(report)
+        click.echo(f"  📄 Report saved to: {save}")
+    else:
+        click.echo(report)
 
     if result.critical_count > 0:
         sys.exit(1)
