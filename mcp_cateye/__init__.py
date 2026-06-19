@@ -4,4 +4,4 @@ Cat's eye sees what others miss — deep inspection of MCP servers
 through active fuzzing, not just static analysis.
 """
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"

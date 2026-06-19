@@ -192,26 +192,50 @@ def _select_payloads_for_param(profile: ParamProfile) -> list[Payload]:
 
 
 def _detect_in_response(response_text: str, patterns: list[str]) -> bool:
-    """Check if any detection pattern appears in the response."""
-    if not patterns:
+    """Check if any detection pattern appears in the response.
+
+    Short patterns (< 4 chars) use word-boundary matching to avoid false
+    positives like 'os' matching 'enclosed' or '49' matching '1490'.
+    """
+    if not patterns or not response_text:
         return False
+    lower = response_text.lower()
     for pattern in patterns:
-        if pattern.lower() in response_text.lower():
-            return True
+        if len(pattern) < 4:
+            if re.search(rf"\b{re.escape(pattern)}\b", lower):
+                return True
+        else:
+            if pattern.lower() in lower:
+                return True
     return False
+
+
+# Strong error indicators — a single match is sufficient. These are nearly
+# always present in error messages and rarely appear in legitimate content.
+_STRONG_ERROR_INDICATORS = (
+    "traceback (most recent call last)",  # Python traceback header
+    "/bin/sh:", "/bin/bash:", "sh: line ", "command not found",
+    "expecting",  # Python exception messages ("Expecting property name")
+    "unterminated",  # Python json / tokenizer errors
+    "unhandled", "errno", "syntax error",
+)
 
 
 def _is_error_response(response_text: str) -> bool:
     """Heuristic: check if the response is primarily an error message."""
     lower = response_text.lower()
+    # Strong indicators: a single match means the response is an error.
+    if any(ind in lower for ind in _STRONG_ERROR_INDICATORS):
+        return True
+    # Otherwise require >= 2 weak indicators in the first 200 chars.
     error_indicators = [
-        "error:", "errno", "exception", "traceback", "not found",
+        "error:", "exception", "traceback", "not found",
         "no such file", "permission denied", "access denied",
-        "invalid", "illegal", "unexpected", "syntax error",
+        "invalid", "illegal", "unexpected",
         "unknown url type", "connection refused", "timed out",
-        "unhandled", "failed to", "cannot ",
+        "failed to", "cannot ", "no attribute",
+        "keyerror", "typeerror", "valueerror", "nameerror",
     ]
-    # If more than half of the first 200 chars are error-like
     prefix = lower[:200]
     hits = sum(1 for ind in error_indicators if ind in prefix)
     return hits >= 2

@@ -232,8 +232,13 @@ def scan(
         click.echo(_format_static_result(result))
 
     if aibom and result.aibom:
-        bom_path = f"aibom-{project_path.replace('/', '-').strip('.')}.json"
         from pathlib import Path
+        # Build a safe filename from project path (no leading dots, no slashes)
+        p = Path(project_path)
+        parts = [part for part in p.parts if part not in ("/", ".")]
+        if not parts:
+            parts = ["current"]
+        bom_path = f"aibom-{'-'.join(parts)}.json"
         Path(bom_path).write_text(json.dumps(result.aibom, indent=2))
         click.echo(f"\n  📋 AI-BOM saved to: {bom_path}")
 

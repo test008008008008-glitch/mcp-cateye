@@ -23,6 +23,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from . import __version__ as _CATEYE_VERSION
+
 # ── Config Discovery ────────────────────────────────────────────────────────
 
 # Known MCP client config paths
@@ -682,7 +684,7 @@ def generate_aibom(
                 {
                     "vendor": "mcp-cateye",
                     "name": "mcp-cateye",
-                    "version": "1.1.0",
+                    "version": _CATEYE_VERSION,
                 }
             ],
             "component": {

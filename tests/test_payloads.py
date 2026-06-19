@@ -107,3 +107,34 @@ class TestScannerHelpers:
         assert args["active"] is True
         assert args["items"] == []
         assert args["meta"] == {}
+
+    def test_detect_in_response_word_boundary(self):
+        """Short patterns (< 4 chars) use word boundary to avoid false positives."""
+        from mcp_cateye.scanner import _detect_in_response
+
+        # "os" must NOT match "enclosed" (substring bug pre-v1.3.0)
+        assert not _detect_in_response("enclosed property", ["os"])
+        # "os" must still match "import os" or "os.system"
+        assert _detect_in_response("import os", ["os"])
+        assert _detect_in_response("os.system", ["os"])
+        # "49" must NOT match inside a larger number
+        assert not _detect_in_response("1490", ["49"])
+        # "49" must still match as standalone token
+        assert _detect_in_response("the answer is 49.", ["49"])
+
+    def test_is_error_response(self):
+        from mcp_cateye.scanner import _is_error_response
+
+        # Strong indicators (single match is enough)
+        assert _is_error_response("/bin/sh: uid=501(cat): command not found")
+        assert _is_error_response(
+            "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+        )
+        assert _is_error_response(
+            "Traceback (most recent call last):\n  File ...\nKeyError: 'x'"
+        )
+        # Plain content with 1 weak indicator: not an error
+        assert not _is_error_response("User not found in cache")
+        # Empty / unrelated
+        assert not _is_error_response("hello world")
+        assert not _is_error_response("")
